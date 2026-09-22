@@ -332,15 +332,17 @@ body {
 }
 
 .affiliation-logos {
-  /* the row is as wide as the affiliation line above it and always stays on one
-     line: each logo takes a fixed share of the row, so they all scale together */
+  /* One row at every width, 1.2x the width of the affiliation line above it.
+     The strip breaks out of the 960px text column and stays centred on the
+     page, capped at 92vw so it never reaches the window edge. Each logo takes
+     a fixed share of the row, so the four scale together. */
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  max-width: 750px;   /* matches the width of the affiliation line above */
-  margin: 1.4rem auto 0.5rem;
+  width: min(900px, 92vw);   /* 900 = 750 x 1.2 */
+  margin: 1.4rem 0 0.5rem 50%;
+  transform: translateX(-50%);
 }
 
 .affiliation-logos img {
