@@ -442,21 +442,23 @@
       </div>
 
       <p class="table-caption">Demonstrations collected in 10 minutes of teleoperation inside HapticWorld.</p>
-      <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
-        <thead>
-          <tr>
-            <th>Collection condition</th>
-            <th>Microwave opening</th>
-            <th>Whiteboard wiping</th>
-            <th>Box flipping</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="ours"><td>With haptic feedback</td><td>26</td><td>19</td><td>22</td></tr>
-          <tr><td>Without haptic feedback</td><td>21</td><td>8</td><td>14</td></tr>
-          <tr><td>Relative throughput</td><td>1.2&times;</td><td>2.4&times;</td><td>1.6&times;</td></tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
+          <thead>
+            <tr>
+              <th>Collection condition</th>
+              <th>Microwave opening</th>
+              <th>Whiteboard wiping</th>
+              <th>Box flipping</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="ours"><td>With haptic feedback</td><td>26</td><td>19</td><td>22</td></tr>
+            <tr><td>Without haptic feedback</td><td>21</td><td>8</td><td>14</td></tr>
+            <tr><td>Relative throughput</td><td>1.2&times;</td><td>2.4&times;</td><td>1.6&times;</td></tr>
+          </tbody>
+        </table>
+      </div>
 
     </div>
 
@@ -475,22 +477,24 @@
       </div>
 
       <p class="table-caption">Real-world success rate (out of 20 trials) of ACT policies trained on 50 demonstrations per configuration. Real-world data serves as a reference upper bound.</p>
-      <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
-        <thead>
-          <tr>
-            <th>Data source</th>
-            <th>IWS (vision-only)</th>
-            <th>HapticWorld w/o feedback</th>
-            <th>Real-world data</th>
-            <th class="ours">HapticWorld (Ours)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Task 1 &ndash; Microwave opening</td><td>10/20</td><td>14/20</td><td>19/20</td><td class="ours">19/20</td></tr>
-          <tr><td>Task 2 &ndash; Whiteboard wiping</td><td>1/20</td><td>5/20</td><td>20/20</td><td class="ours">19/20</td></tr>
-          <tr><td>Task 3 &ndash; Box flipping</td><td>8/20</td><td>6/20</td><td>17/20</td><td class="ours">16/20</td></tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
+          <thead>
+            <tr>
+              <th>Data source</th>
+              <th>IWS (vision-only)</th>
+              <th>HapticWorld w/o feedback</th>
+              <th>Real-world data</th>
+              <th class="ours">HapticWorld (Ours)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Task 1 &ndash; Microwave opening</td><td>10/20</td><td>14/20</td><td>19/20</td><td class="ours">19/20</td></tr>
+            <tr><td>Task 2 &ndash; Whiteboard wiping</td><td>1/20</td><td>5/20</td><td>20/20</td><td class="ours">19/20</td></tr>
+            <tr><td>Task 3 &ndash; Box flipping</td><td>8/20</td><td>6/20</td><td>17/20</td><td class="ours">16/20</td></tr>
+          </tbody>
+        </table>
+      </div>
 
 
       <div class="switcher-bar">
@@ -793,24 +797,26 @@
       </div>
 
       <p class="table-caption">Policy success rate (out of 20 trials). Each policy is evaluated both in the real world and inside HapticWorld.</p>
-      <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
-        <thead>
-          <tr>
-            <th rowspan="2">Task</th>
-            <th colspan="2">Trained on real-world data</th>
-            <th colspan="2">Trained on HapticWorld data</th>
-          </tr>
-          <tr>
-            <th>Eval: Real</th><th>Eval: HapticWorld</th>
-            <th>Eval: Real</th><th>Eval: HapticWorld</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Task 1 &ndash; Microwave opening</td><td>19/20</td><td>19/20</td><td>19/20</td><td>19/20</td></tr>
-          <tr><td>Task 2 &ndash; Whiteboard wiping</td><td>20/20</td><td>20/20</td><td>19/20</td><td>20/20</td></tr>
-          <tr><td>Task 3 &ndash; Box flipping</td><td>17/20</td><td>14/20</td><td>16/20</td><td>14/20</td></tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
+          <thead>
+            <tr>
+              <th rowspan="2">Task</th>
+              <th colspan="2">Trained on real-world data</th>
+              <th colspan="2">Trained on HapticWorld data</th>
+            </tr>
+            <tr>
+              <th>Eval: Real</th><th>Eval: HapticWorld</th>
+              <th>Eval: Real</th><th>Eval: HapticWorld</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Task 1 &ndash; Microwave opening</td><td>19/20</td><td>19/20</td><td>19/20</td><td>19/20</td></tr>
+            <tr><td>Task 2 &ndash; Whiteboard wiping</td><td>20/20</td><td>20/20</td><td>19/20</td><td>20/20</td></tr>
+            <tr><td>Task 3 &ndash; Box flipping</td><td>17/20</td><td>14/20</td><td>16/20</td><td>14/20</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <div class="switcher-bar">
         <label class="switcher-item"><span class="switcher-label">Task</span>

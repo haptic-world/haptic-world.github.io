@@ -215,8 +215,15 @@ body {
   font-weight: 600;
 }
 
+.table-scroll {
+  /* wide tables scroll inside their own box; the page never scrolls sideways */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0 1.5rem;
+}
+
 .results-table {
-  margin: 1rem auto 1.5rem;
+  margin: 0 auto;
   font-size: 0.95rem;
 }
 
@@ -317,12 +324,14 @@ body {
 }
 
 .affiliation-logos {
+  /* one row at every width; the four logos scale together */
+  --logo-h: clamp(19px, 4vw, 34px);
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 1rem 2.5rem;
-  margin: 1.5rem auto 0.5rem;
+  gap: clamp(0.9rem, 3vw, 2.25rem);
+  margin: 1.4rem auto 0.5rem;
 }
 
 .affiliation-logos img {
@@ -331,18 +340,8 @@ body {
   object-fit: contain;
 }
 
-.affiliation-logos .logo-ant      { height: 48px; }
-.affiliation-logos .logo-uiuc     { height: 38px; }
-.affiliation-logos .logo-nvidia   { height: 26px; }
-.affiliation-logos .logo-stanford { height: 40px; }
-
-@media screen and (max-width: 768px) {
-  .affiliation-logos {
-    gap: 0.9rem 1.6rem;
-  }
-
-  .affiliation-logos .logo-ant      { height: 37px; }
-  .affiliation-logos .logo-uiuc     { height: 29px; }
-  .affiliation-logos .logo-nvidia   { height: 20px; }
-  .affiliation-logos .logo-stanford { height: 31px; }
-}
+/* per-logo factors balance the very different aspect ratios optically */
+.affiliation-logos .logo-ant      { height: var(--logo-h); }
+.affiliation-logos .logo-uiuc     { height: calc(var(--logo-h) * 0.79); }
+.affiliation-logos .logo-nvidia   { height: calc(var(--logo-h) * 0.55); }
+.affiliation-logos .logo-stanford { height: calc(var(--logo-h) * 0.83); }
