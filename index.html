@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="HapticWorld: an interactive world simulator that predicts joint torque together with observations and renders it back to the operator in real time.">
+  <meta name="keywords" content="HapticWorld, world model, haptic feedback, torque, teleoperation, robot learning">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HapticWorld</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<!-- ===================== Hero ===================== -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">HapticWorld</h1>
+          <h2 class="title is-3 publication-subtitle">
+            An Interactive World Simulator with Real-time Torque Feedback
+          </h2>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Anonymous Authors</span>
+          </div>
+
+          <div class="is-size-5 publication-venue">Under review</div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- TODO: link to the anonymized PDF (e.g. ./static/paper.pdf). -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- TODO: link to the supplementary video. -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-youtube"></i></span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- TODO: link to the code release. -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Teaser ===================== -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <figure class="media-figure">
+        <!-- Drop static/videos/teaser.mp4 in place and it replaces the Fig. 1 image automatically. -->
+        <video class="media-slot" autoplay muted loop playsinline hidden
+               data-fallback="./static/images/fig1_teaser.jpg"
+               data-alt="HapticWorld overview: box flipping with and without torque feedback, kettlebell pushing, and the slingshot game.">
+          <source src="./static/videos/teaser.mp4" type="video/mp4">
+        </video>
+      </figure>
+      <h2 class="subtitle has-text-centered">
+        <span class="dnerf">HapticWorld</span> closes the haptic loop with a learned world model:
+        the operator teleoperates <em>inside</em> the model and feels the predicted joint torque in
+        real time.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Abstract ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Contact-rich manipulation depends on force sensing that vision alone cannot provide,
+            both for collecting demonstrations and for training policies. Force-annotated data,
+            however, remains hard to obtain at scale: real-robot collection ties every
+            demonstration to physical hardware, physics simulators report contact forces that
+            deviate systematically from real measurements, and learned world simulators, though
+            scalable and realistic, are vision-only, so operators feel nothing during data
+            collection and the data carries no force/torque (F/T) labels.
+          </p>
+          <p>
+            We present <span class="dnerf">HapticWorld</span>, an interactive world simulator that
+            predicts joint torque together with observations and renders it back to the operator
+            in real time, closing the haptic loop between a human and a learned world model.
+            Across three contact-rich tasks, torque feedback raises collection throughput by
+            1.6&times; on average; policies trained purely on HapticWorld-generated demonstrations
+            succeed in 54/60 real-world trials, approaching the 56/60 of upper-bound real-world
+            data and far exceeding the 19/60 of the vision-only pipeline; and the success rates
+            measured inside HapticWorld closely match real-world evaluation, demonstrating that
+            HapticWorld can serve as a stand-alone F/T-conditioned policy evaluation platform.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Method ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">How HapticWorld Works</h2>
+      </div>
+    </div>
+    <div class="columns is-vcentered">
+      <div class="column is-half">
+        <figure class="media-figure">
+          <img class="media-slot" src="./static/images/fig2_overview.png"
+               alt="Overview of HapticWorld: observation history and commanded joint positions enter a consistency dynamics model; the torque head reads the midblock features and renders torque back to the leader arm.">
+        </figure>
+      </div>
+      <div class="column is-half">
+        <div class="content has-text-justified">
+          <p>
+            <strong>Trained on play data, no physics engine.</strong> We teleoperate the real
+            robot with no task objective and record camera images, commanded joint positions,
+            and the joint torques the arm already reports. HapticWorld needs no object models,
+            contact parameters, or per-scene system identification.
+          </p>
+          <p>
+            <strong>Torque as a readout of the dynamics model.</strong> HapticWorld builds on the
+            visual backbone of the Interactive World Simulator, an action-conditioned consistency
+            model. Instead of a separate torque predictor, a lightweight head reads the widest
+            intermediate features of the dynamics network and maps them to per-joint torque,
+            adding only 181K parameters (about 0.5% of the model). The predicted torque is
+            therefore consistent with the visual future by construction, and the torque loss
+            trains the trunk to carry contact information.
+          </p>
+          <p>
+            <strong>Real-time haptic rendering.</strong> Torque comes from the same forward pass
+            that generates the next frame, so the haptic channel adds no inference cost and the
+            loop runs at 10&nbsp;Hz. Gravity is subtracted, the signal is filtered and clamped,
+            and the interaction torque is applied to all eight axes of the leader arm, including
+            the gripper.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Qualitative: torque reflects the interaction ===================== -->
+<section class="section" style="background: #f7f9fc;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Teaser Game Videos</h2>
+      </div>
+    </div>
+
+    <div class="task-heading">
+      <h3 class="title is-4">Kettlebell Pushing</h3>
+    </div>
+    <div class="content section-intro has-text-justified">
+      <p>
+        Three visually distinguishable kettlebells of 5, 10, and 15&nbsp;lb sit on the table.
+        Pushing each produces a markedly different resistance, a direct check that the rendered
+        torque reflects the object being pushed.
+      </p>
+    </div>
+    <div class="media-single">
+      <figure class="media-figure">
+        <p class="media-caption">Pushing the 10 / 5 / 15 lb kettlebells: real-world operator, HapticWorld view, and rendered force</p>
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/posters/kettlebell.jpg">
+          <source src="./static/videos/kettlebell.mp4" type="video/mp4">
+        </video>
+      </figure>
+    </div>
+
+    <div class="task-heading">
+      <h3 class="title is-4">Slingshot Game</h3>
+    </div>
+    <div class="content section-intro has-text-justified">
+      <p>
+        The operator draws a slingshot and releases a projectile into scoring zones. The rendered
+        draw force and the resulting flight distance grow together with how far the slingshot is
+        pulled, landing the projectile in different zones.
+      </p>
+    </div>
+    <div class="media-grid cols-2">
+      <figure class="media-figure">
+        <p class="media-caption">Shot 1: yellow zone (shortest draw)</p>
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/posters/slingshot_1.jpg">
+          <source src="./static/videos/slingshot_1.mp4" type="video/mp4">
+        </video>
+      </figure>
+      <figure class="media-figure">
+        <p class="media-caption">Shot 2: red zone</p>
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/posters/slingshot_2.jpg">
+          <source src="./static/videos/slingshot_2.mp4" type="video/mp4">
+        </video>
+      </figure>
+      <figure class="media-figure">
+        <p class="media-caption">Shot 3: blue zone</p>
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/posters/slingshot_3.jpg">
+          <source src="./static/videos/slingshot_3.mp4" type="video/mp4">
+        </video>
+      </figure>
+      <figure class="media-figure">
+        <p class="media-caption">Shot 4: green zone (longest draw)</p>
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/posters/slingshot_4.jpg">
+          <source src="./static/videos/slingshot_4.mp4" type="video/mp4">
+        </video>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Experiments ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Experiments</h2>
+        <p class="section-intro">
+          We evaluate HapticWorld on three contact-rich tabletop tasks, from data collection to
+          real-robot deployment and in-simulator evaluation.
+        </p>
+      </div>
+    </div>
+
+    <!-- Tasks and data collection -->
+    <div class="task-heading">
+      <h3 class="title is-4">Tasks and Data Collection</h3>
+    </div>
+    <div class="media-figure" style="margin: 1rem 0 1.5rem;">
+      <img class="media-slot" src="./static/images/fig3_tasks.jpg"
+           alt="Hardware setup and tasks: play data is collected by teleoperating the follower arm with a synchronized leader arm; the three tasks are microwave opening, whiteboard wiping and box flipping.">
+    </div>
+
+    <h4 class="title is-5 subsection-title">Data collection</h4>
+    <div class="content has-text-justified">
+      <p>
+        HapticWorld is built and used in two phases, involving two kinds of data.
+      </p>
+      <p>
+        <strong>Play data</strong> trains HapticWorld itself. In the first phase we teleoperate
+        the real robot with no task objective: the operator simply explores the scene while the
+        head-camera images, the commanded joint positions from the leader arm, and the joint
+        torques measured on the follower arm are recorded. For box flipping, for example, play
+        data contains pushing the box in random directions, pivoting it and releasing halfway, or
+        moving the arm without touching the box at all. For each task we collect 500 training and
+        50 validation play episodes of roughly 20&nbsp;s each; training HapticWorld takes about two
+        days on eight NVIDIA A100 GPUs.
+      </p>
+      <p>
+        <strong>Demonstration data</strong> trains the policies. In the second phase the operator
+        teleoperates <em>inside</em> the trained model with real-time torque feedback to collect
+        goal-oriented task demonstrations, whose observations and torque labels are both generated
+        by HapticWorld. For box flipping, a demonstration is a complete, successful flip. We collect
+        50 demonstration episodes per configuration and train a torque-conditioned ACT policy on
+        each; these policies are then evaluated either inside HapticWorld or in the real world.
+      </p>
+    </div>
+    <div class="media-single" style="max-width: 960px;">
+      <figure class="media-figure">
+        <p class="media-caption">Play data collection on the real robot</p>
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/posters/hardware_play_data.jpg">
+          <source src="./static/videos/hardware_play_data.mp4" type="video/mp4">
+        </video>
+      </figure>
+    </div>
+    <p class="media-note">The operator drives the follower arm through a synchronized leader arm while the head-camera view, commanded joint positions and measured joint torques are recorded. This is the only phase that touches physical hardware.</p>
+
+    <h4 class="title is-5 subsection-title">Tasks</h4>
+    <div class="content has-text-justified">
+      <p>
+        We evaluate on three contact-rich tabletop tasks. For each task, play data is task-free
+        exploration of the scene, and demonstration data consists of complete, successful
+        executions collected inside HapticWorld.
+      </p>
+      <ul>
+        <li>
+          <strong>Task 1 &ndash; Microwave opening.</strong> Grasp the door handle and pull it open
+          along the hinge arc, where the grasp must transmit force without slipping. A trial
+          succeeds if the door is opened to at least 45&deg;.
+          <em>Play data:</em> grasping and releasing the handle, and pulling the door to random
+          angles or pushing it back.
+          <em>Demonstration data:</em> complete openings past 45&deg;.
+        </li>
+        <li>
+          <strong>Task 2 &ndash; Whiteboard wiping.</strong> Erase marks from a whiteboard. Whether
+          the eraser is in contact is hard to tell visually, so the operator must rely on torque
+          feedback to judge. A trial succeeds if no marks remain visible.
+          <em>Play data:</em> wiping in different directions, partial wipes, and wipes that miss
+          the board.
+          <em>Demonstration data:</em> complete erasures.
+        </li>
+        <li>
+          <strong>Task 3 &ndash; Box flipping.</strong> Press a box against a fixture and pivot it
+          upright, where the normal force must be maintained within the friction cone throughout
+          the rotation to avoid slip. A trial succeeds if the box is brought upright to 90&deg;.
+          <em>Play data:</em> random pushes, halfway pivots that are then released, and
+          contact-free arm motion.
+          <em>Demonstration data:</em> complete, successful flips.
+        </li>
+      </ul>
+    </div>
+
+    <!-- Research questions -->
+    <h4 class="title is-5 subsection-title">Experimental design</h4>
+    <div class="content has-text-justified">
+      <p>
+        Our experiments are designed to answer four questions, which correspond to the main
+        claims of this work:
+      </p>
+      <ol class="question-list">
+        <li><strong>Q1</strong> Does HapticWorld predict joint torque accurately?</li>
+        <li><strong>Q2</strong> Does haptic feedback improve in-simulator data collection?</li>
+        <li><strong>Q3</strong> Can policies trained on HapticWorld-generated force-annotated demonstrations transfer directly to real robots?</li>
+        <li><strong>Q4</strong> Can HapticWorld serve as a stand-alone evaluation platform for force-conditioned policies?</li>
+      </ol>
+      <p>
+        <strong>Evaluation protocol.</strong> Each policy is trained once and evaluated over 20
+        trials with randomized initial configurations, both in the real world and inside
+        HapticWorld. Each rollout is limited to 20&nbsp;s.
+      </p>
+    </div>
+
+    <!-- Q1 -->
+    <div class="question-block">
+      <span class="question-label">Q1</span>
+      <h3 class="title is-4">HapticWorld Accurately Predicts Torque</h3>
+      <div class="content has-text-justified">
+        <p>
+          On 50 held-out validation episodes per task, the predicted joint torques closely track
+          the measured ground truth. Overall torque RMSE is 0.38&nbsp;N&middot;m on microwave
+          opening, 0.26&nbsp;N&middot;m on whiteboard wiping, and 0.36&nbsp;N&middot;m on box
+          flipping, i.e. 7&ndash;10% of the average contact torque on the most-loaded joint.
+          Use the menu to view the prediction on each task.
+        </p>
+      </div>
+      <div class="switcher-bar">
+        <label class="switcher-item"><span class="switcher-label">Task</span>
+        <span class="select is-small is-rounded task-select-wrap">
+          <select class="task-select" data-switcher="q1" data-key="task" aria-label="Select task">
+            <option value="microwave">Task 1: Microwave opening</option>
+            <option value="whiteboard">Task 2: Whiteboard wiping</option>
+            <option value="box">Task 3: Box flipping</option>
+          </select>
+        </span>
+        </label>
+      </div>
+      <div class="switcher-panels">
+        <div class="task-panel" data-switcher="q1" data-task="microwave">
+          <figure class="media-figure">
+            <img class="media-slot" src="./static/images/torque_microwave.png"
+                 alt="Predicted vs. measured joint torque, task 1: microwave opening">
+          </figure>
+        </div>
+        <div class="task-panel" data-switcher="q1" data-task="whiteboard" hidden>
+          <figure class="media-figure">
+            <img class="media-slot" src="./static/images/torque_whiteboard.png"
+                 alt="Predicted vs. measured joint torque, task 2: whiteboard wiping">
+          </figure>
+        </div>
+        <div class="task-panel" data-switcher="q1" data-task="box" hidden>
+          <figure class="media-figure">
+            <img class="media-slot" src="./static/images/torque_box.png"
+                 alt="Predicted vs. measured joint torque, task 3: box flipping">
+          </figure>
+        </div>
+      </div>
+      <p class="media-note">Predicted (dashed orange) and measured (solid blue) torque for all eight joints on a held-out validation episode; per-joint RMSE in the panel titles.</p>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-block">
+      <span class="question-label">Q2</span>
+      <h3 class="title is-4">Torque Feedback Improves Data Collection</h3>
+      <div class="content has-text-justified">
+        <p>
+          Without torque feedback the operator cannot perceive contact, and the applied force
+          drifts outside the range covered by the real play data in either direction:
+          under-application leaves the task incomplete, while over-application pushes the
+          commanded pose into regions the play data never contains and the rollout degrades.
+          Feeling the predicted torque restores the physical constraint inside the model, so
+          collection is both <span class="highlight">faster</span> and yields
+          <span class="highlight">better demonstrations</span>.
+        </p>
+      </div>
+
+      <p class="table-caption">Demonstrations collected in 10 minutes of teleoperation inside HapticWorld.</p>
+      <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
+        <thead>
+          <tr>
+            <th>Collection condition</th>
+            <th>Microwave opening</th>
+            <th>Whiteboard wiping</th>
+            <th>Box flipping</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ours"><td>With haptic feedback</td><td>26</td><td>19</td><td>22</td></tr>
+          <tr><td>Without haptic feedback</td><td>21</td><td>8</td><td>14</td></tr>
+          <tr><td>Relative throughput</td><td>1.2&times;</td><td>2.4&times;</td><td>1.6&times;</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-block">
+      <span class="question-label">Q3</span>
+      <h3 class="title is-4">Policies Trained in HapticWorld Work on Real Hardware</h3>
+      <div class="content has-text-justified">
+        <p>
+          We collect 50 demonstrations per configuration and train an ACT policy on each.
+          Policies trained purely on HapticWorld demonstrations reach 19/20, 19/20 and 16/20 in
+          the real world, within one trial of policies trained on real-world demonstrations on
+          every task, and far above the complete vision-only pipeline (collecting inside the
+          vision-only simulator and training an image-only policy).
+        </p>
+      </div>
+
+      <p class="table-caption">Real-world success rate (out of 20 trials) of ACT policies trained on 50 demonstrations per configuration. Real-world data serves as a reference upper bound.</p>
+      <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
+        <thead>
+          <tr>
+            <th>Data source</th>
+            <th>IWS (vision-only)</th>
+            <th>HapticWorld w/o feedback</th>
+            <th>Real-world data</th>
+            <th class="ours">HapticWorld (Ours)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Task 1 &ndash; Microwave opening</td><td>10/20</td><td>14/20</td><td>19/20</td><td class="ours">19/20</td></tr>
+          <tr><td>Task 2 &ndash; Whiteboard wiping</td><td>1/20</td><td>5/20</td><td>20/20</td><td class="ours">19/20</td></tr>
+          <tr><td>Task 3 &ndash; Box flipping</td><td>8/20</td><td>6/20</td><td>17/20</td><td class="ours">16/20</td></tr>
+        </tbody>
+      </table>
+
+
+      <div class="switcher-bar">
+        <label class="switcher-item"><span class="switcher-label">Task</span>
+        <span class="select is-small is-rounded task-select-wrap">
+          <select class="task-select" data-switcher="q3" data-key="task" aria-label="Select task">
+            <option value="microwave">Task 1: Microwave opening</option>
+            <option value="whiteboard">Task 2: Whiteboard wiping</option>
+            <option value="box">Task 3: Box flipping</option>
+          </select>
+        </span>
+        </label>
+        <label class="switcher-item"><span class="switcher-label">Video</span>
+        <span class="select is-small is-rounded task-select-wrap">
+          <select class="task-select" data-switcher="q3" data-key="example" aria-label="Select example">
+            <option value="1">Video 1</option>
+            <option value="2">Video 2</option>
+            <option value="3">Video 3</option>
+          </select>
+        </span>
+        </label>
+      </div>
+      <div class="switcher-panels composite-panels">
+        <div class="task-panel" data-switcher="q3" data-task="microwave">
+          <div class="media-single" style="max-width: 960px; margin-top: 0.5rem;">
+            <figure class="media-figure">
+              <p class="media-caption">Autonomous rollouts side by side</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_rollout_composite.jpg">
+                <source src="./static/videos/microwave_rollout_composite.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="whiteboard" hidden>
+          <div class="media-single" style="max-width: 960px; margin-top: 0.5rem;">
+            <figure class="media-figure">
+              <p class="media-caption">Autonomous rollouts side by side</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_rollout_composite.jpg">
+                <source src="./static/videos/whiteboard_rollout_composite.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="box" hidden>
+          <div class="media-single" style="max-width: 960px; margin-top: 0.5rem;">
+            <figure class="media-figure">
+              <p class="media-caption">Autonomous rollouts side by side</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_rollout_composite.jpg">
+                <source src="./static/videos/box_rollout_composite.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+      </div>
+      <p class="media-note">Top row: policy without the torque modality, trained on IWS data. Bottom row: torque-conditioned policy trained on HapticWorld data. Left: real-world rollout (inset: head-camera view). Right: the same policy rolled out inside the simulator, as evaluated in Q4. Force traces are shown below the HapticWorld rollouts.</p>
+      <div class="switcher-panels">
+        <div class="task-panel" data-switcher="q3" data-task="microwave" data-example="1">
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_iws_real_1.jpg">
+                <source src="./static/videos/microwave_iws_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_realdata_real_1.jpg">
+                <source src="./static/videos/microwave_realdata_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_hapticworld_real_1.jpg">
+                <source src="./static/videos/microwave_hapticworld_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="microwave" data-example="2" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_iws_real_2.jpg">
+                <source src="./static/videos/microwave_iws_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_realdata_real_2.jpg">
+                <source src="./static/videos/microwave_realdata_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_hapticworld_real_2.jpg">
+                <source src="./static/videos/microwave_hapticworld_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="microwave" data-example="3" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_iws_real_3.jpg">
+                <source src="./static/videos/microwave_iws_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_realdata_real_3.jpg">
+                <source src="./static/videos/microwave_realdata_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_hapticworld_real_3.jpg">
+                <source src="./static/videos/microwave_hapticworld_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="whiteboard" data-example="1" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_iws_real_1.jpg">
+                <source src="./static/videos/whiteboard_iws_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_realdata_real_1.jpg">
+                <source src="./static/videos/whiteboard_realdata_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_hapticworld_real_1.jpg">
+                <source src="./static/videos/whiteboard_hapticworld_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="whiteboard" data-example="2" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_iws_real_2.jpg">
+                <source src="./static/videos/whiteboard_iws_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_realdata_real_2.jpg">
+                <source src="./static/videos/whiteboard_realdata_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_hapticworld_real_2.jpg">
+                <source src="./static/videos/whiteboard_hapticworld_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="whiteboard" data-example="3" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_iws_real_3.jpg">
+                <source src="./static/videos/whiteboard_iws_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_realdata_real_3.jpg">
+                <source src="./static/videos/whiteboard_realdata_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_hapticworld_real_3.jpg">
+                <source src="./static/videos/whiteboard_hapticworld_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="box" data-example="1" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_iws_real_1.jpg">
+                <source src="./static/videos/box_iws_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_realdata_real_1.jpg">
+                <source src="./static/videos/box_realdata_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_hapticworld_real_1.jpg">
+                <source src="./static/videos/box_hapticworld_real_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="box" data-example="2" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_iws_real_2.jpg">
+                <source src="./static/videos/box_iws_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_realdata_real_2.jpg">
+                <source src="./static/videos/box_realdata_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_hapticworld_real_2.jpg">
+                <source src="./static/videos/box_hapticworld_real_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q3" data-task="box" data-example="3" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only pipeline (IWS)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_iws_real_3.jpg">
+                <source src="./static/videos/box_iws_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_realdata_real_3.jpg">
+                <source src="./static/videos/box_realdata_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data (Ours)</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_hapticworld_real_3.jpg">
+                <source src="./static/videos/box_hapticworld_real_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+      </div>
+      <p class="media-note">Real-world rollouts of ACT policies trained on 50 demonstrations from each source, shown in real time. Torque traces below the frame show the gripper force observed by the torque-conditioned policies.</p>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-block">
+      <span class="question-label">Q4</span>
+      <h3 class="title is-4">HapticWorld as a Stand-alone Evaluation Platform</h3>
+      <div class="content has-text-justified">
+        <p>
+          Because HapticWorld predicts torque, force-conditioned policies can be rolled out
+          inside it, which a vision-only simulator cannot host. Across all tasks and
+          configurations, in-simulator evaluation preserves the ordering of policies and deviates
+          from real-world success by at most three trials out of twenty.
+        </p>
+      </div>
+
+      <p class="table-caption">Policy success rate (out of 20 trials). Each policy is evaluated both in the real world and inside HapticWorld.</p>
+      <table class="table is-bordered is-narrow results-table" style="margin-left:auto;margin-right:auto;">
+        <thead>
+          <tr>
+            <th rowspan="2">Task</th>
+            <th colspan="2">Trained on real-world data</th>
+            <th colspan="2">Trained on HapticWorld data</th>
+          </tr>
+          <tr>
+            <th>Eval: Real</th><th>Eval: HapticWorld</th>
+            <th>Eval: Real</th><th>Eval: HapticWorld</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Task 1 &ndash; Microwave opening</td><td>19/20</td><td>19/20</td><td>19/20</td><td>19/20</td></tr>
+          <tr><td>Task 2 &ndash; Whiteboard wiping</td><td>20/20</td><td>20/20</td><td>19/20</td><td>20/20</td></tr>
+          <tr><td>Task 3 &ndash; Box flipping</td><td>17/20</td><td>14/20</td><td>16/20</td><td>14/20</td></tr>
+        </tbody>
+      </table>
+
+      <div class="switcher-bar">
+        <label class="switcher-item"><span class="switcher-label">Task</span>
+        <span class="select is-small is-rounded task-select-wrap">
+          <select class="task-select" data-switcher="q4" data-key="task" aria-label="Select task">
+            <option value="microwave">Task 1: Microwave opening</option>
+            <option value="whiteboard">Task 2: Whiteboard wiping</option>
+            <option value="box">Task 3: Box flipping</option>
+          </select>
+        </span>
+        </label>
+        <label class="switcher-item"><span class="switcher-label">Video</span>
+        <span class="select is-small is-rounded task-select-wrap">
+          <select class="task-select" data-switcher="q4" data-key="example" aria-label="Select example">
+            <option value="1">Video 1</option>
+            <option value="2">Video 2</option>
+            <option value="3">Video 3</option>
+          </select>
+        </span>
+        </label>
+      </div>
+      <div class="switcher-panels">
+        <div class="task-panel" data-switcher="q4" data-task="microwave" data-example="1">
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_realdata_sim_1.jpg">
+                <source src="./static/videos/microwave_realdata_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_hapticworld_sim_1.jpg">
+                <source src="./static/videos/microwave_hapticworld_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_iws_sim_1.jpg">
+                <source src="./static/videos/microwave_iws_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="microwave" data-example="2" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_realdata_sim_2.jpg">
+                <source src="./static/videos/microwave_realdata_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_hapticworld_sim_2.jpg">
+                <source src="./static/videos/microwave_hapticworld_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_iws_sim_2.jpg">
+                <source src="./static/videos/microwave_iws_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="microwave" data-example="3" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_realdata_sim_3.jpg">
+                <source src="./static/videos/microwave_realdata_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_hapticworld_sim_3.jpg">
+                <source src="./static/videos/microwave_hapticworld_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/microwave_iws_sim_3.jpg">
+                <source src="./static/videos/microwave_iws_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="whiteboard" data-example="1" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_realdata_sim_1.jpg">
+                <source src="./static/videos/whiteboard_realdata_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_hapticworld_sim_1.jpg">
+                <source src="./static/videos/whiteboard_hapticworld_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_iws_sim_1.jpg">
+                <source src="./static/videos/whiteboard_iws_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="whiteboard" data-example="2" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_realdata_sim_2.jpg">
+                <source src="./static/videos/whiteboard_realdata_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_hapticworld_sim_2.jpg">
+                <source src="./static/videos/whiteboard_hapticworld_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_iws_sim_2.jpg">
+                <source src="./static/videos/whiteboard_iws_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="whiteboard" data-example="3" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_realdata_sim_3.jpg">
+                <source src="./static/videos/whiteboard_realdata_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_hapticworld_sim_3.jpg">
+                <source src="./static/videos/whiteboard_hapticworld_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/whiteboard_iws_sim_3.jpg">
+                <source src="./static/videos/whiteboard_iws_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="box" data-example="1" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_realdata_sim_1.jpg">
+                <source src="./static/videos/box_realdata_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_hapticworld_sim_1.jpg">
+                <source src="./static/videos/box_hapticworld_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_iws_sim_1.jpg">
+                <source src="./static/videos/box_iws_sim_1.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="box" data-example="2" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_realdata_sim_2.jpg">
+                <source src="./static/videos/box_realdata_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_hapticworld_sim_2.jpg">
+                <source src="./static/videos/box_hapticworld_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_iws_sim_2.jpg">
+                <source src="./static/videos/box_iws_sim_2.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+        <div class="task-panel" data-switcher="q4" data-task="box" data-example="3" hidden>
+          <div class="media-grid cols-3">
+            <figure class="media-figure">
+              <p class="media-caption">Trained on real-world data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_realdata_sim_3.jpg">
+                <source src="./static/videos/box_realdata_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Trained on HapticWorld data, rolled out inside HapticWorld</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_hapticworld_sim_3.jpg">
+                <source src="./static/videos/box_hapticworld_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+            <figure class="media-figure">
+              <p class="media-caption">Vision-only (IWS) policy, rolled out inside IWS</p>
+              <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+                     poster="./static/images/posters/box_iws_sim_3.jpg">
+                <source src="./static/videos/box_iws_sim_3.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </div>
+        </div>
+      </div>
+      <p class="media-note">Policy rollouts inside the simulator: every frame and every torque value is generated by the world model. Compare with the real-world rollouts of the same policies above.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Long-horizon interaction ===================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Long-Horizon Teleoperation Inside HapticWorld</h2>
+        <p class="section-intro">
+          A single, uncut teleoperation episode of more than two minutes inside HapticWorld.
+          Both the predicted video and the predicted torque remain stable over the whole
+          interaction: the scene does not drift or collapse as the autoregressive rollout
+          grows, and the rendered torque keeps tracking contact throughout.
+        </p>
+      </div>
+    </div>
+    <div class="media-single" style="max-width: 960px;">
+      <figure class="media-figure">
+        <video class="media-slot" controls muted loop playsinline preload="metadata" hidden
+               poster="./static/images/long_horizon_poster.jpg">
+          <source src="./static/videos/long_horizon_teleop.mp4" type="video/mp4">
+        </video>
+      </figure>
+    </div>
+    <p class="media-note">Frames are generated entirely by HapticWorld in response to the operator's commands; no real camera is involved.</p>
+  </div>
+</section>
+
+<!-- ===================== Conclusion ===================== -->
+<section class="section" style="background: #f7f9fc;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Conclusion</h2>
+        <div class="content has-text-justified">
+          <p>
+            We presented <span class="dnerf">HapticWorld</span>, an interactive world simulator
+            that predicts interaction torque jointly with visual observations and renders it back
+            to the operator in real time, closing the haptic loop between a human operator and a
+            learned world model. A lightweight readout of the dynamics network's intermediate
+            features recovers joint torque accurately enough to be felt during teleoperation and
+            consumed by downstream policies.
+          </p>
+          <p>
+            Across three contact-rich tasks, haptic feedback raises collection throughput by
+            1.6&times; on average, and the torque-annotated demonstrations collected inside
+            HapticWorld are sufficient to train torque-conditioned policies that succeed in the
+            real world, approaching policies trained on real-world data and far exceeding the
+            vision-only pipeline. In-simulator evaluation further preserves real-world policy
+            results for this policy class, which vision-only simulators cannot achieve.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            This website is licensed under a <a rel="license"
+              href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons
+              Attribution-ShareAlike 4.0 International License</a>.
+            Built on the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> template.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
