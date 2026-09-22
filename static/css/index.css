@@ -71,6 +71,14 @@ body {
   display: inline-block;
 }
 
+/* the deliberate break after the third author only makes sense when the line
+   is wide enough to hold three names; on phones the text wraps on its own */
+@media screen and (max-width: 768px) {
+  .author-break {
+    display: none;
+  }
+}
+
 .publication-video {
   position: relative;
   width: 100%;
@@ -324,24 +332,25 @@ body {
 }
 
 .affiliation-logos {
-  /* one row at every width; the four logos scale together */
-  --logo-h: clamp(19px, 4vw, 34px);
+  /* the row is as wide as the affiliation line above it and always stays on one
+     line: each logo takes a fixed share of the row, so they all scale together */
   display: flex;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: clamp(0.9rem, 3vw, 2.25rem);
+  width: 100%;
+  max-width: 750px;   /* matches the width of the affiliation line above */
   margin: 1.4rem auto 0.5rem;
 }
 
 .affiliation-logos img {
   display: block;
-  width: auto;
+  height: auto;
   object-fit: contain;
 }
 
-/* per-logo factors balance the very different aspect ratios optically */
-.affiliation-logos .logo-ant      { height: var(--logo-h); }
-.affiliation-logos .logo-uiuc     { height: calc(var(--logo-h) * 0.79); }
-.affiliation-logos .logo-nvidia   { height: calc(var(--logo-h) * 0.55); }
-.affiliation-logos .logo-stanford { height: calc(var(--logo-h) * 0.83); }
+/* shares are aspect ratio x an optical weight, so the four read as one size */
+.affiliation-logos .logo-ant      { width: 18.7%; }
+.affiliation-logos .logo-uiuc     { width: 24.4%; }
+.affiliation-logos .logo-nvidia   { width: 23.6%; }
+.affiliation-logos .logo-stanford { width: 21.3%; }
