@@ -32,6 +32,7 @@ body {
 
 .publication-title,
 .publication-authors,
+.publication-affiliations,
 .publication-subtitle {
   font-family: 'Google Sans', sans-serif;
 }
@@ -302,4 +303,46 @@ body {
   display: inline-block;
   min-width: 2.4rem;
   color: #3273dc;
+}
+
+/* ---- authors, affiliations and institution logos ---- */
+
+.publication-affiliations {
+  margin-top: 0.35rem;
+  color: #363636;
+}
+
+.publication-affiliations sup {
+  margin-right: 0.1em;
+}
+
+.affiliation-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem 2.5rem;
+  margin: 1.5rem auto 0.5rem;
+}
+
+.affiliation-logos img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+}
+
+.affiliation-logos .logo-ant      { height: 48px; }
+.affiliation-logos .logo-uiuc     { height: 38px; }
+.affiliation-logos .logo-nvidia   { height: 26px; }
+.affiliation-logos .logo-stanford { height: 40px; }
+
+@media screen and (max-width: 768px) {
+  .affiliation-logos {
+    gap: 0.9rem 1.6rem;
+  }
+
+  .affiliation-logos .logo-ant      { height: 37px; }
+  .affiliation-logos .logo-uiuc     { height: 29px; }
+  .affiliation-logos .logo-nvidia   { height: 20px; }
+  .affiliation-logos .logo-stanford { height: 31px; }
 }

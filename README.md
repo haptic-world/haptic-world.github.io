@@ -1,8 +1,10 @@
 # HapticWorld project page
 
-Source for [hapticworld-anon.github.io](https://hapticworld-anon.github.io), built on the
+Source for [haptic-world.github.io](https://haptic-world.github.io), built on the
 [Nerfies](https://github.com/nerfies/nerfies.github.io) template (Bulma + jQuery, no build step).
-Author information is anonymized for double-blind review.
+
+Institution logos live in `static/images/logos/` and are sized individually in
+`static/css/index.css` (`.affiliation-logos .logo-*`) so they balance optically.
 
 ## Adding media
 
