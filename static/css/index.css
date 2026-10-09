@@ -356,3 +356,24 @@ body {
 .affiliation-logos .logo-uiuc     { width: 24.4%; }
 .affiliation-logos .logo-nvidia   { width: 23.6%; }
 .affiliation-logos .logo-stanford { width: 21.3%; }
+
+/* ---- equal-size rollout videos in the Q3 / Q4 three-up grids ----
+   The vision-only clips carry no torque strip, so they are shorter than the
+   two torque-conditioned ones next to them. Each task panel declares the
+   tallest ratio of its own three clips; the short one is letterboxed with
+   blank space at the bottom, where the others show their torque trace, so the
+   robot scenes stay aligned and the three tiles match. */
+
+.task-panel[data-switcher="q3"][data-task="microwave"]  { --panel-ratio: 1024 / 890; }
+.task-panel[data-switcher="q3"][data-task="whiteboard"] { --panel-ratio: 1024 / 890; }
+.task-panel[data-switcher="q3"][data-task="box"]        { --panel-ratio: 1024 / 938; }
+.task-panel[data-switcher="q4"][data-task="microwave"]  { --panel-ratio: 1024 / 1082; }
+.task-panel[data-switcher="q4"][data-task="whiteboard"] { --panel-ratio: 1024 / 1082; }
+.task-panel[data-switcher="q4"][data-task="box"]        { --panel-ratio: 1024 / 1130; }
+
+.task-panel .media-grid.cols-3 video.media-slot {
+  aspect-ratio: var(--panel-ratio);
+  object-fit: contain;
+  object-position: top;
+  background: #fff;
+}
