@@ -55,10 +55,10 @@ Q1–Q4 each have a dropdown next to the heading (`select.task-select`) that sho
 
 ## Remaining TODOs in `index.html`
 
-- The Code button still links to `#`; point it at the code release when it is public.
 - The venue line still reads "Under review".
 
-Paper and arXiv point at https://arxiv.org/abs/2609.31924. The Video button and the embedded
+Paper and arXiv point at https://arxiv.org/abs/2609.31924, Code at
+https://github.com/capy8ra/HapticWorld. The Video button and the embedded
 player above the abstract both use https://www.youtube.com/watch?v=UGhT2hnDrBE; to change the
 video, update the `watch?v=` link in the hero and the `embed/` id in the Video section.
 
